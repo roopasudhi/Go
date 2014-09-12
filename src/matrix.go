@@ -1,9 +1,9 @@
 package main
 
 import (
-	"encoding/csv"
+	//	"encoding/csv"
 	"fmt"
-	"os"
+	//	"os"
 	"strconv"
 )
 
@@ -98,6 +98,7 @@ func Build(record [][]string) *Matrix {
 	return matrix
 }
 
+/*
 func main() {
 
 	f, _ := os.Open("matin.csv")
@@ -111,3 +112,4 @@ func main() {
 	matC := matA.Multiply(*matB)
 	matC.print()
 }
+*/

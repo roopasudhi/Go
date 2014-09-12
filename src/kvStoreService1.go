@@ -1,20 +1,12 @@
 package main
 
 import (
+	"exercise"
 	"exercise/kv"
-	"fmt"
 	"io/ioutil"
 	"net/http"
 	"strconv"
 	"strings"
-	"os"
-)
-
-const (
-	GET    = "GET"
-	PUT    = "PUT"
-	POST   = "POST"
-	DELETE = "DELETE"
 )
 
 func getId(p string) string {
@@ -24,25 +16,24 @@ func getId(p string) string {
 	return id
 }
 
-
-func CrudHandler(store kv.Store) http.Handler {
+func CrudHandler(store kv.Store) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
 		content, _ := ioutil.ReadAll(r.Body)
 		id := getId(r.URL.Path)
 
 		switch r.Method {
-		case PUT:
+		case exercise.PUT:
 			{
 				kvStr := strings.Split(string(content), ":")
 				store.Put(kvStr[0], kvStr[1])
 			}
-		case GET:
+		case exercise.GET:
 			{
 				v, _ := store.Get(id)
 				w.Write([]byte(v))
 			}
-		case DELETE:
+		case exercise.DELETE:
 			{
 				store.Delete(id)
 			}
@@ -50,14 +41,13 @@ func CrudHandler(store kv.Store) http.Handler {
 	})
 }
 
-
-func CountHandler(store kv.Store) http.Handler {
+func CountHandler(store kv.Store) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
 		id := getId(r.URL.Path)
 
 		switch r.Method {
-		case GET:
+		case exercise.GET:
 			{
 				v := store.Count(id)
 				w.Write([]byte(strconv.Itoa(v)))
@@ -66,16 +56,18 @@ func CountHandler(store kv.Store) http.Handler {
 		}
 	})
 }
-func startKVService(port string) {
+func newKVService(port string) *exercise.HttpServer {
 	store := kv.NewStore()
-	http.Handle("/kv/", CrudHandler(store))
-	http.Handle("/kv/count/", CountHandler(store))
-	http.ListenAndServe(port, nil)
+	server := exercise.NewHttpServer(port)
+	server.AddHandler("/kv/", CrudHandler(store))
+	server.AddHandler("/kv/count/", CountHandler(store))
+	return server
 }
-func stop() {
-	os.Exit(0)
-}
+
+/*
 func main() {
-	startKVService(":9090")
+	service := newKVService(":9090")
+	service.ListenAndServe()
 	fmt.Println("Started on 9090")
 }
+*/
